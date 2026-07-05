@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מכרז פתוח</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --line:#262b35;
+    --text:#e8eaee;
+    --muted:#8b93a1;
+    --accent:#4fd1a5;
+    --accent-dim:#2c6b52;
+    --danger:#e2664a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Segoe UI", Arial, sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 16px;
+  }
+  .eyebrow{
+    color:var(--muted);
+    letter-spacing:2px;
+    font-size:12px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  h1{
+    font-size:26px;
+    margin:0 0 30px 0;
+    font-weight:600;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:32px 40px;
+    max-width:460px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  }
+  .label{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:10px;
+  }
+  .price{
+    font-size:56px;
+    font-weight:700;
+    color:var(--accent);
+    letter-spacing:-1px;
+    line-height:1;
+    margin-bottom:6px;
+    direction:ltr;
+  }
+  .price.loading{
+    color:var(--muted);
+    font-size:22px;
+  }
+  .price.empty{
+    color:var(--muted);
+    font-size:22px;
+  }
+  .meta{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:14px;
+  }
+  .count-pill{
+    display:inline-block;
+    margin-top:10px;
+    background:var(--accent-dim);
+    color:#d8fff0;
+    padding:4px 12px;
+    border-radius:999px;
+    font-size:12px;
+  }
+  .cta{
+    display:block;
+    margin-top:28px;
+    background:var(--accent);
+    color:#08120e;
+    text-decoration:none;
+    font-weight:600;
+    padding:14px 20px;
+    border-radius:10px;
+    font-size:16px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .cta:hover{
+    background:#69dfb5;
+    transform:translateY(-1px);
+  }
+  .refresh{
+    margin-top:16px;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .refresh:hover{
+    color:var(--text);
+    border-color:var(--muted);
+  }
+  .error{
+    color:var(--danger);
+    font-size:13px;
+    margin-top:12px;
+  }
+  footer{
+    margin-top:30px;
+    color:var(--muted);
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">מכרז פעיל</div>
+  <h1>מי ייתן את ההצעה הזולה ביותר?</h1>
+
+  <div class="card">
+    <div class="label">ההצעה הזולה כרגע</div>
+    <div id="price" class="price loading">טוען…</div>
+    <div id="count" class="count-pill" style="display:none;"></div>
+    <div id="err" class="error" style="display:none;"></div>
+
+    <a id="formLink" class="cta" href="https://docs.google.com/forms/d/e/1FAIpQLSe6Q4SdFCEquYfXRvIWQBMDs5Qdk6iYP4AztRppV2WvNC2huA/viewform" target="_blank" rel="noopener">
+      הגש הצעה חדשה
+    </a>
+    <button class="refresh" onclick="loadBid()">רענן</button>
+    <div class="meta" id="updated"></div>
+  </div>
+
+  <footer>הפרטים של המציעים אינם מוצגים — רק הסכום הזול ביותר</footer>
+
+<script>
+  // קישור ה-CSV הציבורי של גיליון ה-"Public" בלבד (עמודה אחת - סכומים בלבד)
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQVuspuMba4jyLzDLAz4RDMZgcPl_HezZR4Gq3Dzn5GC4znDJ9Ph2x0gJGD_BOnwJ_TuBiMDCa-eq3K/pub?gid=1912830060&single=true&output=csv";
+
+  async function loadBid(){
+    const priceEl = document.getElementById('price');
+    const countEl = document.getElementById('count');
+    const errEl = document.getElementById('err');
+    const updatedEl = document.getElementById('updated');
+
+    priceEl.className = 'price loading';
+    priceEl.textContent = 'טוען…';
+    errEl.style.display = 'none';
+    countEl.style.display = 'none';
+
+    try {
+      // מונע קאשינג של גוגל כדי לקבל תמיד את הערך העדכני
+      const res = await fetch(CSV_URL + "&t=" + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('לא ניתן לטעון את הקובץ (' + res.status + ')');
+
+      const text = await res.text();
+
+      // הגיליון המפורסם מכיל עמודה אחת עם כל הסכומים (בלי שם/מייל) - מחשבים MIN בצד הלקוח
+      const rows = text.split(/\r?\n/).filter(r => r.trim() !== '');
+      const amounts = rows
+        .map(r => parseFloat(r.split(',')[0].replace(/"/g, '').trim()))
+        .filter(v => !isNaN(v));
+
+      if (amounts.length === 0) {
+        priceEl.className = 'price empty';
+        priceEl.textContent = 'עדיין אין הצעות';
+      } else {
+        const min = Math.min(...amounts);
+        priceEl.className = 'price';
+        priceEl.textContent = '₪' + min.toLocaleString('he-IL');
+        countEl.textContent = amounts.length + ' הצעות הוגשו';
+        countEl.style.display = 'inline-block';
+      }
+
+      updatedEl.textContent = 'עודכן: ' + new Date().toLocaleTimeString('he-IL');
+    } catch (e) {
+      priceEl.className = 'price empty';
+      priceEl.textContent = '—';
+      errEl.textContent = 'שגיאה בטעינת הנתונים: ' + e.message;
+      errEl.style.display = 'block';
+    }
+  }
+
+  loadBid();
+  setInterval(loadBid, 30000); // רענון אוטומטי כל 30 שניות
+</script>
+
+</body>
+</html>
