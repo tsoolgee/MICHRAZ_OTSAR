@@ -36,8 +36,14 @@
   }
   h1{
     font-size:26px;
-    margin:0 0 30px 0;
+    margin:0 0 8px 0;
     font-weight:600;
+  }
+  .product-sub{
+    color:var(--muted);
+    font-size:15px;
+    margin-bottom:30px;
+    text-align:center;
   }
   .card{
     background:var(--panel);
@@ -89,6 +95,14 @@
     color:var(--muted);
     font-size:13px;
     margin-top:14px;
+  }
+  .privacy-note{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    color:#9fb8ac;
+    font-size:13px;
+    line-height:1.5;
   }
   .count-pill{
     display:inline-block;
@@ -144,7 +158,8 @@
 <body>
 
   <div class="eyebrow">מכרז פעיל</div>
-  <h1>מי ייתן את ההצעה הזולה ביותר?</h1>
+  <h1>מכרז אוצה"ס במ"ע חדש</h1>
+  <div class="product-sub">גמרא מכות אדום מורחב &nbsp;•&nbsp; כמות: 150–250</div>
 
   <div class="card">
     <div class="label">ההצעה הזולה כרגע</div>
@@ -153,6 +168,7 @@
     <div id="err" class="error" style="display:none;"></div>
     <button class="refresh" onclick="loadBid()">רענן</button>
     <div class="meta" id="updated"></div>
+    <div class="privacy-note">🔒 אף אחד לא רואה מי הציע כל סכום — רק המספר הזול ביותר מוצג כאן</div>
   </div>
 
   <div class="form-card">
