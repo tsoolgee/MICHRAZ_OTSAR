@@ -49,6 +49,20 @@
     text-align:center;
     box-shadow:0 20px 60px rgba(0,0,0,0.35);
   }
+  .form-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:24px;
+    max-width:640px;
+    width:100%;
+    margin-top:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  }
+  .form-card iframe{
+    border-radius:8px;
+    display:block;
+  }
   .label{
     color:var(--muted);
     font-size:14px;
@@ -137,12 +151,21 @@
     <div id="price" class="price loading">טוען…</div>
     <div id="count" class="count-pill" style="display:none;"></div>
     <div id="err" class="error" style="display:none;"></div>
-
-    <a id="formLink" class="cta" href="https://docs.google.com/forms/d/e/1FAIpQLSe6Q4SdFCEquYfXRvIWQBMDs5Qdk6iYP4AztRppV2WvNC2huA/viewform" target="_blank" rel="noopener">
-      הגש הצעה חדשה
-    </a>
     <button class="refresh" onclick="loadBid()">רענן</button>
     <div class="meta" id="updated"></div>
+  </div>
+
+  <div class="form-card">
+    <div class="label" style="margin-bottom:14px;">הגשת הצעה חדשה</div>
+    <iframe
+      src="https://docs.google.com/forms/d/e/1FAIpQLSe6Q4SdFCEquYfXRvIWQBMDs5Qdk6iYP4AztRppV2WvNC2huA/viewform?embedded=true"
+      width="100%"
+      height="700"
+      frameborder="0"
+      marginheight="0"
+      marginwidth="0">
+      טוען טופס…
+    </iframe>
   </div>
 
   <footer>הפרטים של המציעים אינם מוצגים — רק הסכום הזול ביותר</footer>
